@@ -1,0 +1,36 @@
+{
+    "name": "WSTD_DLAY",
+    "dpf": {
+        "dpf_path": "../dep/",
+        "makefile_dep": [
+            "wstd.clrs"
+        ],
+        "enable_ui": true,
+        "enable_modgui": true,
+        "ui_size": {
+            "width": 440,
+            "height": 180
+        },
+        "midi_input": 0,
+        "midi_output": 0,
+        "version": "0, 1, 0",
+        "license": "GPL-3.0-or-later",
+        "homepage": "https://wasted.audio/software/wstd_dlay",
+        "plugin_uri": "https://wasted.audio/software/wstd_dlay",
+        "plugin_clap_id": "audio.wasted.wstd_dlay",
+        "plugin_formats": [
+            "lv2_sep",
+            "vst2",
+            "vst3",
+            "clap",
+            "jack"
+        ],
+        "lv2_info": "lv2:DolayPlugin",
+        "vst3_info": "Fx|Modulation|Stereo",
+        "clap_info": [
+            "audio-effect",
+            "delay",
+            "stereo"
+        ]
+    }
+}
