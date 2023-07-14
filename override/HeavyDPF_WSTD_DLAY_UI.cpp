@@ -105,7 +105,6 @@ protected:
     */
     void onImGuiDisplay() override
     {
-
         const float width = getWidth();
         const float height = getHeight();
         const float margin = 0.0f;
@@ -116,9 +115,8 @@ protected:
         ImGuiStyle& style = ImGui::GetStyle();
         style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
 
-
-        style.Colors[ImGuiCol_TitleBgActive] = (ImVec4)ImColor::HSV(3.31f / 3.6f, 0.64f, 0.40f);
-        style.Colors[ImGuiCol_WindowBg] = (ImVec4)ImColor::HSV(3.31f / 3.6f, 0.64f, 0.10f);
+        style.Colors[ImGuiCol_TitleBgActive] = (ImVec4)WstdTitleBgActive;
+        style.Colors[ImGuiCol_WindowBg] = (ImVec4)WstdWindowBg;
 
         ImGuiIO& io(ImGui::GetIO());
         ImFont* defaultFont = ImGui::GetFont();
@@ -140,15 +138,19 @@ protected:
         auto MixActive       = ColorMix(TimeActive, Yellow, intense, fmix);
         auto MixHovered      = ColorMix(TimeHovered, YellowBr, intense, fmix);
 
-        const float hundred = 100 * getScaleFactor();
+        auto scaleFactor = getScaleFactor();
+        const float hundred = 100 * scaleFactor;
+        const float toggleWidth = 20 * scaleFactor;
 
-        auto perc = 1.0f;
-        auto ms = 10.0f;
+        auto percstep = 1.0f;
+        auto msstep = 10.0f;
+        auto syncstep = 0.08f;
 
         if (io.KeyShift)
         {
-            perc = 0.1f;
-            ms = 1.0f;
+            percstep = 0.1f;
+            msstep = 1.0f;
+            syncstep = 0.03f;
         }
 
         EnumParam timesync_list[] = {
@@ -170,11 +172,9 @@ protected:
         ImGui::PushFont(titleBarFont);
         if (ImGui::Begin("WSTD DLAY", nullptr, ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoCollapse))
         {
-
-            ImGui::Dummy(ImVec2(0.0f, 8.0f * getScaleFactor()));
+            ImGui::Dummy(ImVec2(0.0f, 8.0f * scaleFactor));
             ImGui::PushFont(defaultFont);
             auto ImGuiKnob_Flags = ImGuiKnobFlags_DoubleClickReset + ImGuiKnobFlags_ValueTooltip + ImGuiKnobFlags_NoInput + ImGuiKnobFlags_ValueTooltipHideOnClick;
-            auto ImGuiKnob_FlagsDB = ImGuiKnob_Flags + ImGuiKnobFlags_dB;
             auto ImGuiKnob_FlagsLog = ImGuiKnob_Flags + ImGuiKnobFlags_Logarithmic;
 
             ImGui::BeginGroup();
@@ -184,7 +184,7 @@ protected:
                 if (not fsync)
                 {
                     if (ImGuiKnobs::Knob(
-                        "Time", &ftime, 50.0f, 5000.0f, ms, "%.0fms",
+                        "Time", &ftime, 50.0f, 5000.0f, msstep, "%.0fms",
                         ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_FlagsLog, 21))
                     {
                         if (ImGui::IsItemActivated())
@@ -200,9 +200,8 @@ protected:
                 if (fsync)
                 {
                     if (ImGuiKnobs::KnobInt(
-                        "Time", &current_item_id, 0, items_len-1, 0.1f, timesync_list[current_item_id].label,
-                        ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, items_len
-                    ))
+                        "Time", &current_item_id, 0, items_len-1, syncstep, timesync_list[current_item_id].label,
+                        ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, items_len))
                     {
                         if (ImGui::IsItemActivated())
                         {
@@ -217,20 +216,18 @@ protected:
                         setParameterValue(5, ftimesync);
                     }
                 }
+                ImGui::PopStyleColor(2);
                 ImGui::SameLine();
 
-                auto syncstring = "Sync";
-                ImVec2 textSize = ImGui::CalcTextSize(syncstring);
-                auto margin = (30.0f * getScaleFactor() - textSize.x)/ 2.0f;
-
-                ImGui::Dummy(ImVec2(margin, 0.0f) * getScaleFactor()); ImGui::SameLine();
+                // ImGui::Dummy(ImVec2(margin, 0.0f) * scaleFactor); ImGui::SameLine();
                 ImGui::BeginGroup();
                 {
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.85f, 0.85f, 0.85f, 0.85f));
-                    ImGui::Text(syncstring);
+                    // Title text
+                    ImGui::PushStyleColor(ImGuiCol_Text, TextClr);
+                    CenterTextX("Sync", toggleWidth);
                     ImGui::PopStyleColor();
 
-                    ImGui::Dummy(ImVec2(0.0f, 35.0f) * getScaleFactor());
+                    ImGui::Dummy(ImVec2(0.0f, 35.0f) * scaleFactor);
 
                     // knob
                     ImGui::PushStyleColor(ImGuiCol_Text,            (ImVec4)SyncSw);
@@ -254,13 +251,12 @@ protected:
                 }
                 ImGui::EndGroup();
             }
-            ImGui::PopStyleColor(2);
             ImGui::EndGroup();
             ImGui::SameLine();
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)FeedbackActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)FeedbackHovered);
-            if (ImGuiKnobs::Knob("Feedback", &ffeedback, 0.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_Space, hundred, ImGuiKnob_Flags))
+            if (ImGuiKnobs::Knob("Feedback", &ffeedback, 0.0f, 100.0f, percstep, "%.1f%%", ImGuiKnobVariant_Space, hundred, ImGuiKnob_Flags))
             {
                 if (ImGui::IsItemActivated())
                 {
@@ -276,7 +272,7 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)CrossActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)CrossHovered);
-            if (ImGuiKnobs::Knob("Cross", &fcross, 0.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
+            if (ImGuiKnobs::Knob("Cross", &fcross, 0.0f, 100.0f, percstep, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
                 {
@@ -292,7 +288,7 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)MixActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)MixHovered);
-            if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
+            if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, percstep, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
                 {
