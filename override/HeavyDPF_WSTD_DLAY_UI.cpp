@@ -11,12 +11,6 @@
 START_NAMESPACE_DISTRHO
 
 // --------------------------------------------------------------------------------------------------------------------
-
-struct EnumParam {
-    const char* label;
-    float value;
-};
-
 class ImGuiPluginUI : public UI
 {
     float fcross = 20.0f;
@@ -24,10 +18,10 @@ class ImGuiPluginUI : public UI
     float fmix = 50.0f;
     bool fsync = 0.0f != 0.0f;
     float ftime = 500.0f;
-    float ftimesync = 1.0f;
+    int ftimesync = 6.0;
 
     int default_item_id = 6;
-    int current_item_id = default_item_id;
+
     int items_len = 13;
 
     ResizeHandle fResizeHandle;
@@ -153,20 +147,20 @@ protected:
             syncstep = 0.03f;
         }
 
-        EnumParam timesync_list[] = {
-            { "×6", 0.16666666666f },
-            { "×5", 0.2f },
-            { "×4", 0.25f },
-            { "×3", 0.33333333333f },
-            { "×2", 0.5f },
-            { "×1.5", 0.66666666666f },
-            { "×1", 1.0f },
-            { "÷1.5",1.5f },
-            { "÷2", 2.0f },
-            { "÷3", 3.0f },
-            { "÷4", 4.0f },
-            { "÷5", 5.0f },
-            { "÷6", 6.0f }
+        const char* timesync_list[13] = {
+            "×6",
+            "×5",
+            "×4",
+            "×3",
+            "×2",
+            "×1.5",
+            "×1",
+            "÷1.5",
+            "÷2",
+            "÷3",
+            "÷4",
+            "÷5",
+            "÷6",
         };
 
         ImGui::PushFont(titleBarFont);
@@ -200,7 +194,7 @@ protected:
                 if (fsync)
                 {
                     if (ImGuiKnobs::KnobInt(
-                        "Time", &current_item_id, 0, items_len-1, syncstep, timesync_list[current_item_id].label,
+                        "Time", &ftimesync, 0, items_len-1, syncstep, timesync_list[ftimesync],
                         ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, items_len))
                     {
                         if (ImGui::IsItemActivated())
@@ -208,11 +202,9 @@ protected:
                             editParameter(5, true);
                             if (ImGui::IsMouseDoubleClicked(0))
                             {
-                                ftimesync = timesync_list[default_item_id].value;
-                                current_item_id = default_item_id;
+                                ftimesync = default_item_id;
                             }
                         }
-                        ftimesync = timesync_list[current_item_id].value;
                         setParameterValue(5, ftimesync);
                     }
                 }
