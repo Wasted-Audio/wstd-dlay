@@ -1,0 +1,7 @@
+@name@
+
+This is our simple delay effect plugin. As you would expect it's very easy to use, with only a few controls. However it has a few tricks up its sleeves!
+
+The delay time goes from 50ms up to 5000ms and you can switch to DAW synchronization with steps ranging from 1/6th up to 6x the speed of your session. Next to that the Cross control wil blend the left and right channel from regular stereo all the way to inverted, or ping-pong, effect.
+
+Like all our other software this plugin is without DRM and Opensource.
